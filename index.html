@@ -4,7 +4,7 @@
     <script>
         // =====================================================================
         // ▼▼▼ [필수] 구글 앱스 스크립트 배포 주소를 따옴표 안에 넣으세요 ▼▼▼
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw63ci3LmW-6HHTGEzGbL1QPrrXsWKCahDiUwJkrH-F_pdVEOHzTKCx5ElSAHlLsNve/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyaxH_BQpCyajK5OPrRK0JbOKNtXSXDKCz8JokcdPVq3-qppK5z2QFZhznZk9Z6_B8h/exec"; 
         // =====================================================================
     </script>
     <meta charset="UTF-8">
@@ -64,7 +64,7 @@
         .modal-header { color: #e74c3c; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2em; font-weight: bold; }
         .modal-body { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
         
-        /* 상세 보기 */
+        /* 상세 보기 카드 */
         .detail-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #bdc3c7; }
         .detail-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
         .detail-item { display: flex; margin-bottom: 5px; font-size: 0.95em; }
@@ -77,11 +77,9 @@
         .feed-item { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: relative; }
         .feed-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
         .feed-img { max-width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
-        
-        /* 삭제 버튼 스타일 */
         .btn-delete { color: #999; border: 1px solid #ddd; background: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; cursor: pointer; margin-left: 10px;}
         .btn-delete:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
-
+        
         .comment-section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; border-top: 1px solid #eee; }
         .comment-list { list-style: none; padding: 0; margin-bottom: 10px; }
         .comment-item { background: #fff; padding: 8px 10px; margin-bottom: 5px; border-radius: 6px; font-size: 0.85em; border: 1px solid #eee; display:flex; gap: 8px; }
@@ -210,7 +208,7 @@
                 <input type="number" id="inputRating" step="0.1" min="0" max="5" value="0.0" style="padding:5px; border:1px solid #ddd; border-radius:4px; width:100px;">
             </div>
             <div class="input-group">
-                <label style="font-weight:bold; display:block; margin-bottom:10px;">📝 상세 항목</label>
+                <label style="font-weight:bold; display:block; margin-bottom:10px;">📝 상세 항목 </label>
                 <div id="taskItemsContainer"></div>
                 <button class="btn-add" onclick="addTaskItem()">+ 항목 추가</button>
             </div>
@@ -242,11 +240,9 @@
     document.getElementById('userName').addEventListener('input', function() {
         localStorage.setItem('study_username', this.value);
         if(this.value) { currentAvatarSeed = this.value; updateAvatarPreview(); }
-        // 이름 바뀌면 삭제 버튼 등을 위해 다시 렌더링
         renderFeed();
     });
 
-    // --- 주간 달력 ---
     function renderWeeklyCalendar() {
         const grid = document.getElementById('weeklyCalendar');
         grid.innerHTML = '';
@@ -289,7 +285,10 @@
                 const memberInfo = dbData.members ? dbData.members.find(m => m.name === item.name) : null;
                 const avatarUrl = memberInfo && memberInfo.avatar ? memberInfo.avatar : `https://api.dicebear.com/7.x/notionists/svg?seed=${item.name}`;
                 
-                card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${item.name}</span>${parsed.rating ? `<span class="rating-badge">★${parsed.rating}</span>` : ''}`;
+                // [수정됨] 이름 3글자 이상이면 뒤 2글자만
+                let displayName = item.name.length >= 3 ? item.name.slice(-2) : item.name;
+
+                card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${displayName}</span>${parsed.rating ? `<span class="rating-badge">★${parsed.rating}</span>` : ''}`;
                 body.appendChild(card);
             });
 
@@ -299,7 +298,11 @@
                         const card = document.createElement('div');
                         card.className = 'submitter-card faint'; 
                         const avatarUrl = member.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${member.name}`;
-                        card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${member.name}</span>`;
+                        
+                        // [수정됨] 이름 3글자 이상이면 뒤 2글자만
+                        let displayName = member.name.length >= 3 ? member.name.slice(-2) : member.name;
+
+                        card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${displayName}</span>`;
                         body.appendChild(card);
                     }
                 });
@@ -390,7 +393,6 @@
 
             const dateStr = new Date(feed.timestamp).toLocaleString();
             
-            // 삭제 버튼: 내 글일 때만 표시
             let deleteBtn = "";
             if(myName && feed.name === myName) {
                 deleteBtn = `<button class="btn-delete" onclick="deleteFeed('${feed.id}')">삭제</button>`;
@@ -458,20 +460,12 @@
         fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(newData) });
     }
 
-    // [삭제 기능]
     function deleteFeed(feedId) {
         if(!confirm("정말 이 글을 삭제하시겠습니까?")) return;
         const name = document.getElementById('userName').value.trim();
-        
-        // 화면에서 즉시 제거
         dbData.feeds = dbData.feeds.filter(f => f.id !== feedId);
         renderFeed();
-
-        // 서버에 삭제 요청
-        fetch(SCRIPT_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: 'deleteFeed', id: feedId, name: name }) 
-        });
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteFeed', id: feedId, name: name }) });
     }
 
     function saveComment(feedId) {
