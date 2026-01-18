@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<script>
-    // =====================================================================
-    // ▼▼▼ [필수] 여기에 구글 앱스 스크립트 배포 주소를 붙여넣으세요! ▼▼▼
-    // 따옴표("") 안에 주소가 들어가야 합니다.
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPzqObrlx0q5kXHHMPAKBTzq9J3XTd5j-LuPkxZKCWhNjiZ4pPEUbYMxFqLQxM3kvXpg/exec"; 
-    // =====================================================================
-</script>
+    <script>
+        // =====================================================================
+        // ▼▼▼ [필수] 여기에 구글 앱스 스크립트 배포 주소를 붙여넣으세요! ▼▼▼
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPzqObrlx0q5kXHHMPAKBTzq9J3XTd5j-LuPkxZKCWhNjiZ4pPEUbYMxFqLQxM3kvXpg/exec"; 
+        // =====================================================================
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>뼈갈단 스터디 통합 대시보드</title>
+    <title>뼈갈단 V2 </title>
     <style>
-        /* 스타일 코드 */
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8f9fa; color: #333; margin: 0; }
         .banner { width: 100%; max-height: 300px; object-fit: cover; border-bottom: 3px solid #e74c3c; }
         .container { max-width: 1200px; margin: 20px auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #eee; }
         
+        /* 탭 메뉴 */
         .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 20px; flex-wrap: wrap;}
         .tab-link { padding: 15px 10px; cursor: pointer; font-weight: bold; color: #999; transition: 0.3s; flex: 1; text-align: center; min-width: 80px; }
         .tab-link:hover { color: #e74c3c; background: #fff5f5; }
@@ -25,12 +24,14 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* 공통 스타일 */
         h2 { color: #e74c3c; text-align: center; margin-top: 0; }
         .sub-title { color: #666; text-align: center; margin-bottom: 20px; }
         input.name-input { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #e74c3c; border-radius: 8px; background: #fff; color: #333; text-align: center; font-size: 1.1em; font-weight:bold; box-sizing: border-box; }
         .btn-submit { width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1em; transition: 0.3s; }
         .btn-submit:hover { background: #c0392b; }
 
+        /* 주간 달력 스타일 */
         .calendar-controls { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; font-size: 1.3em; font-weight: bold; color: #333; }
         .btn-move { background: none; border: none; color: #e74c3c; font-size: 1.5em; cursor: pointer; padding: 0 20px; }
         
@@ -44,11 +45,18 @@
         .day-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; gap: 5px; cursor: pointer; transition: 0.2s; }
         .day-body:hover { background-color: #fafafa; }
 
-        .submitter-card { background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; }
+        /* 제출자 카드 */
+        .submitter-card { background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; transition: 0.2s;}
         .submitter-card.me { border-color: #e74c3c; background: #fff0f0; }
-        .mini-avatar { width: 20px; height: 20px; border-radius: 50%; background: #eee; }
+        
+        /* [NEW] 희미한 멤버 (Ghost) 스타일 */
+        .submitter-card.faint { opacity: 0.4; filter: grayscale(100%); background: #f5f5f5; border: 1px dashed #ccc; box-shadow: none; }
+        .submitter-card.faint:hover { opacity: 0.8; filter: grayscale(0%); }
+
+        .mini-avatar { width: 20px; height: 20px; border-radius: 50%; background: #eee; object-fit: cover; }
         .rating-badge { margin-left: auto; font-weight: bold; color: #f1c40f; font-size: 0.9em; }
 
+        /* 입력 폼 스타일 */
         .input-group { margin-bottom: 15px; border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fafafa; }
         .input-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .type-select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 80px; }
@@ -56,11 +64,13 @@
         .btn-add { background: #34495e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
         .btn-remove { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         
+        /* 모달 스타일 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 600px; max-width: 95%; max-height: 90vh; display: flex; flex-direction: column; }
         .modal-header { color: #e74c3c; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2em; font-weight: bold; }
         .modal-body { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
         
+        /* 상세 보기 스타일 */
         .detail-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #bdc3c7; }
         .detail-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
         .detail-item { display: flex; margin-bottom: 5px; font-size: 0.95em; }
@@ -70,16 +80,31 @@
         .type-rest { background: #2ecc71; }
         .type-etc { background: #95a5a6; }
 
+        /* 멤버 갤러리 및 피드 스타일 */
+        .member-form { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #eee; display:flex; flex-direction: column; align-items: center; }
+        .avatar-preview-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 15px; }
+        .avatar-preview { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background: #eee; object-fit: cover; margin-bottom: 10px;}
+        .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .member-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; }
+        .member-card:hover { transform: translateY(-5px); border-color: #e74c3c; }
+        .member-avatar { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; border: 3px solid #f0f0f0; object-fit: cover; background-color: #fff; }
+        .member-name { font-weight: bold; font-size: 1.2em; color: #2c3e50; margin-bottom: 5px; }
+        .member-bio { font-size: 0.9em; color: #666; word-break: keep-all; line-height: 1.5; }
+
+        .feed-list { list-style: none; padding: 0; }
+        .feed-item { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .feed-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
+        .feed-img { max-width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
+        textarea.feed-input, textarea#inputBio { width: 100%; height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; font-family: inherit;}
+        
+        .ranking-list { list-style: none; padding: 0; }
+        .ranking-item { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .rank { font-weight: bold; font-size: 1.2em; color: #e74c3c; margin-right: 15px; min-width: 40px; }
+
         .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); display:flex; justify-content:center; align-items:center; flex-direction: column; z-index: 2000; }
         .loading-spinner { border: 5px solid #f3f3f3; border-top: 5px solid #e74c3c; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .close-btn { cursor: pointer; font-size: 2em; line-height: 0.5; color: #999; }
-        
-        .ranking-list, .feed-list, .member-grid { list-style: none; padding: 0; }
-        .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-        .member-card { border: 1px solid #eee; padding: 15px; text-align: center; border-radius: 10px; background: #fff; }
-        .member-avatar { width: 60px; height: 60px; border-radius: 50%; margin-bottom: 10px; }
-        textarea.feed-input { width: 100%; height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box;}
     </style>
 </head>
 <body>
@@ -112,12 +137,12 @@
             <button onclick="loadData()" style="font-size:0.8em; cursor:pointer; background:none; border:none; color:#e74c3c;">🔄</button>
         </div>
 
-        <div class="weekly-grid" id="weeklyCalendar">
-            </div>
+        <div class="weekly-grid" id="weeklyCalendar"></div>
     </div>
 
     <div id="rankingTab" class="tab-content">
         <h2>🏆 최다 뼈갈이 랭킹</h2>
+        <div class="sub-title">누가 제일 열심히 했나</div>
         <ul id="rankingList" class="ranking-list"></ul>
     </div>
 
@@ -125,6 +150,7 @@
         <h2>💀 뼈이스북</h2>
         <div style="margin-bottom:20px;">
             <textarea id="inputFeed" class="feed-input" placeholder="자유롭게 글을 남겨보세요..."></textarea>
+            <input type="text" id="inputFeedImg" placeholder="[선택] 사진 이미지 주소(URL)를 붙여넣으세요" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box; margin-bottom:10px;">
             <button class="btn-submit" onclick="saveFeed()">게시하기</button>
         </div>
         <ul id="feedList" class="feed-list"></ul>
@@ -132,6 +158,26 @@
 
     <div id="memberTab" class="tab-content">
         <h2>👥 멤버 목록</h2>
+        
+        <div class="member-form">
+            <h4 style="margin-top:0;">내 캐릭터 만들기</h4>
+            <div class="avatar-preview-container">
+                <img id="avatarPreview" src="" class="avatar-preview">
+                <div style="display:flex; gap:10px;">
+                    <select id="avatarStyle" onchange="updateAvatarPreview()" style="padding:5px;">
+                        <option value="notionists">노션 스타일</option>
+                        <option value="adventurer">모험가</option>
+                        <option value="bottts">로봇</option>
+                        <option value="pixel-art">픽셀</option>
+                        <option value="lorelei">예술</option>
+                    </select>
+                    <button onclick="randomizeAvatar()" style="cursor:pointer;">🎲 랜덤</button>
+                </div>
+            </div>
+            <textarea id="inputBio" placeholder="자기소개..."></textarea>
+            <button class="btn-submit" onclick="saveMember()">프로필 저장하기</button>
+        </div>
+
         <div class="member-grid" id="memberList"></div>
     </div>
 </div>
@@ -166,24 +212,34 @@
     currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
     let dbData = { tasks: [], feeds: [], comments: [], members: [] };
     let selectedDateKey = null;
+    let currentAvatarSeed = "";
 
     window.onload = function() {
         const savedName = localStorage.getItem('study_username');
-        if(savedName) document.getElementById('userName').value = savedName;
+        if(savedName) {
+            document.getElementById('userName').value = savedName;
+            currentAvatarSeed = savedName;
+        } else {
+            currentAvatarSeed = "bone";
+        }
+        updateAvatarPreview();
         addTaskItem(); 
         loadData();
     };
 
     document.getElementById('userName').addEventListener('input', function() {
         localStorage.setItem('study_username', this.value);
+        if(this.value) { currentAvatarSeed = this.value; updateAvatarPreview(); }
     });
 
+    // --- 주간 달력 로직 (수정됨: 희미한 멤버 표시) ---
     function renderWeeklyCalendar() {
         const grid = document.getElementById('weeklyCalendar');
         grid.innerHTML = '';
         const weekEnd = new Date(currentWeekStart);
         weekEnd.setDate(weekEnd.getDate() + 6);
         document.getElementById('currentWeekRange').innerText = `${currentWeekStart.getMonth()+1}.${currentWeekStart.getDate()} ~ ${weekEnd.getMonth()+1}.${weekEnd.getDate()}`;
+        
         const myName = document.getElementById('userName').value.trim();
         const days = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -191,6 +247,7 @@
             const dateObj = new Date(currentWeekStart);
             dateObj.setDate(dateObj.getDate() + i);
             const dateKey = `${dateObj.getFullYear()}-${dateObj.getMonth()+1}-${dateObj.getDate()}`;
+            
             const col = document.createElement('div');
             col.className = 'day-column';
             const todayKey = new Date().getFullYear() + '-' + (new Date().getMonth()+1) + '-' + new Date().getDate();
@@ -206,34 +263,103 @@
             body.className = 'day-body';
             body.onclick = () => openModal(dateKey);
 
-            if (dbData.tasks) {
-                const todaysData = dbData.tasks.filter(t => t.date === dateKey);
-                todaysData.forEach(item => {
-                    let parsed = parseTaskContent(item.task);
-                    const card = document.createElement('div');
-                    card.className = 'submitter-card';
-                    if (myName && item.name === myName) card.classList.add('me');
-                    const memberInfo = dbData.members ? dbData.members.find(m => m.name === item.name) : null;
-                    const avatarUrl = memberInfo && memberInfo.avatar ? memberInfo.avatar : `https://api.dicebear.com/7.x/notionists/svg?seed=${item.name}`;
-                    card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${item.name}</span>${parsed.rating ? `<span class="rating-badge">★${parsed.rating}</span>` : ''}`;
-                    body.appendChild(card);
+            // 1. 제출한 사람 먼저 표시
+            const todaysTasks = dbData.tasks ? dbData.tasks.filter(t => t.date === dateKey) : [];
+            const submittedNames = new Set(todaysTasks.map(t => t.name));
+
+            todaysTasks.forEach(item => {
+                let parsed = parseTaskContent(item.task);
+                const card = document.createElement('div');
+                card.className = 'submitter-card';
+                if (myName && item.name === myName) card.classList.add('me');
+                
+                const memberInfo = dbData.members ? dbData.members.find(m => m.name === item.name) : null;
+                const avatarUrl = memberInfo && memberInfo.avatar ? memberInfo.avatar : `https://api.dicebear.com/7.x/notionists/svg?seed=${item.name}`;
+                
+                card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${item.name}</span>${parsed.rating ? `<span class="rating-badge">★${parsed.rating}</span>` : ''}`;
+                body.appendChild(card);
+            });
+
+            // 2. 제출 안 한 멤버 희미하게 표시 (멤버 등록된 사람 중)
+            if (dbData.members) {
+                dbData.members.forEach(member => {
+                    if (!submittedNames.has(member.name)) {
+                        const card = document.createElement('div');
+                        card.className = 'submitter-card faint'; // 희미한 스타일 적용
+                        const avatarUrl = member.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${member.name}`;
+                        card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${member.name}</span>`;
+                        body.appendChild(card);
+                    }
                 });
             }
+
             col.appendChild(header); col.appendChild(body); grid.appendChild(col);
         }
     }
 
     function changeWeek(days) { currentWeekStart.setDate(currentWeekStart.getDate() + days); renderWeeklyCalendar(); }
 
+    // --- 동적 항목 추가 (수정됨: '기타') ---
     function addTaskItem(initialData = null) {
         const container = document.getElementById('taskItemsContainer');
         const div = document.createElement('div');
         div.className = 'input-row';
-        div.innerHTML = `<select class="type-select"><option value="업무">업무</option><option value="공부">공부</option><option value="회복">회복</option><option value="기타">직접</option></select><input type="text" class="content-input" placeholder="내용을 입력하세요 (예: 단어 1장 암기)"><button class="btn-remove" onclick="this.parentElement.remove()">X</button>`;
+        div.innerHTML = `<select class="type-select"><option value="업무">업무</option><option value="공부">공부</option><option value="회복">회복</option><option value="기타">기타</option></select><input type="text" class="content-input" placeholder="내용을 입력하세요 (예: 단어 1장 암기)"><button class="btn-remove" onclick="this.parentElement.remove()">X</button>`;
         container.appendChild(div);
         if(initialData) { div.querySelector('.type-select').value = initialData.category; div.querySelector('.content-input').value = initialData.content; }
     }
 
+    // --- 렌더링 함수들 복구 ---
+    function renderRanking() {
+        const listEl = document.getElementById('rankingList'); listEl.innerHTML = '';
+        if (!dbData.tasks || dbData.tasks.length === 0) { listEl.innerHTML = '<li style="text-align:center; padding:20px; color:#999;">기록 없음</li>'; return; }
+        const counts = {};
+        dbData.tasks.forEach(t => { counts[t.name] = (counts[t.name] || 0) + 1; });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        sorted.forEach((item, index) => {
+            const li = document.createElement('li'); li.className = 'ranking-item';
+            li.innerHTML = `<span class="rank">${index+1}위</span><span>${item[0]}</span><span>${item[1]}회</span>`;
+            listEl.appendChild(li);
+        });
+    }
+
+    function renderFeed() {
+        const listEl = document.getElementById('feedList'); listEl.innerHTML = '';
+        if (!dbData.feeds || dbData.feeds.length === 0) { listEl.innerHTML = '<li style="text-align:center; padding:20px; color:#999;">첫 글을 남겨보세요!</li>'; return; }
+        [...dbData.feeds].reverse().forEach(feed => {
+            const li = document.createElement('li'); li.className = 'feed-item';
+            // 사진이 있으면 표시 (feed.content 안에 이미지 URL이 있거나 별도 필드) - 여기서는 content에 <img> 태그가 포함된 경우로 가정하거나 별도 처리
+            // 이번 업데이트에서는 content에 텍스트, imgUrl을 별도로 처리하지 않고 content 뒤에 붙이는 방식 사용
+            
+            // 피드 내용 파싱 (혹시 JSON이면)
+            let content = feed.content;
+            let imgHtml = "";
+            try {
+                if(content.startsWith("{")) {
+                    const parsed = JSON.parse(content);
+                    content = parsed.text;
+                    if(parsed.img) imgHtml = `<img src="${parsed.img}" class="feed-img">`;
+                }
+            } catch(e) {}
+
+            const dateStr = new Date(feed.timestamp).toLocaleString();
+            li.innerHTML = `<div class="feed-header"><span style="font-weight:bold;">${feed.name}</span><span style="font-size:0.8em; color:#999;">${dateStr}</span></div>${imgHtml}<div style="white-space:pre-wrap;">${content}</div>`;
+            listEl.appendChild(li);
+        });
+    }
+
+    function renderMembers() {
+        const listEl = document.getElementById('memberList'); listEl.innerHTML = '';
+        if (!dbData.members || dbData.members.length === 0) { listEl.innerHTML = '<p style="text-align:center; color:#999;">멤버가 없습니다.</p>'; return; }
+        dbData.members.forEach(member => {
+            const div = document.createElement('div'); div.className = 'member-card';
+            const avatarUrl = member.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${member.name}`;
+            div.innerHTML = `<img src="${avatarUrl}" class="member-avatar"><div class="member-name">${member.name}</div><div class="member-bio">${member.bio}</div>`;
+            listEl.appendChild(div);
+        });
+    }
+
+    // --- 저장 함수들 ---
     function saveTask() {
         const name = document.getElementById('userName').value.trim();
         const rating = document.getElementById('inputRating').value;
@@ -255,23 +381,55 @@
         fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(newData) });
     }
 
+    function saveFeed() {
+        const name = document.getElementById('userName').value.trim();
+        const content = document.getElementById('inputFeed').value.trim();
+        const imgUrl = document.getElementById('inputFeedImg').value.trim();
+
+        if(!name || (!content && !imgUrl)) { alert("내용을 입력해주세요."); return; }
+        
+        // 이미지와 텍스트를 JSON으로 묶어서 저장
+        const feedData = { text: content, img: imgUrl };
+        const feedString = JSON.stringify(feedData);
+
+        const newData = { action: 'saveFeed', id: 'feed_' + Date.now(), name: name, content: feedString, timestamp: new Date().toISOString() };
+        
+        if(!dbData.feeds) dbData.feeds = [];
+        dbData.feeds.push(newData);
+        renderFeed();
+        document.getElementById('inputFeed').value = '';
+        document.getElementById('inputFeedImg').value = '';
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(newData) });
+    }
+
+    function saveMember() {
+        const name = document.getElementById('userName').value.trim();
+        const bio = document.getElementById('inputBio').value.trim();
+        const avatarUrl = document.getElementById('avatarPreview').src;
+        if(!name || !bio) { alert("이름과 소개를 입력하세요."); return; }
+        const newData = { action: 'saveMember', name: name, bio: bio, avatar: avatarUrl };
+        if(!dbData.members) dbData.members = [];
+        const idx = dbData.members.findIndex(m => m.name === name);
+        if(idx >= 0) dbData.members[idx] = newData; else dbData.members.push(newData);
+        renderMembers(); renderWeeklyCalendar(); // 아바타 업데이트를 위해 달력도 갱신
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(newData) });
+        alert("프로필 저장 완료!");
+    }
+
+    // --- 기타 유틸리티 ---
     function loadData() {
         const loadingEl = document.getElementById('loadingMsg');
-        if(typeof SCRIPT_URL === 'undefined' || SCRIPT_URL.includes("여기에")) { loadingEl.style.display='none'; alert("주소를 넣어주세요!"); return; }
+        if(typeof SCRIPT_URL === 'undefined' || SCRIPT_URL.includes("여기에")) { loadingEl.style.display='none'; alert("HTML 파일에 구글 주소를 넣어주세요!"); return; }
         loadingEl.style.display = 'flex';
         fetch(SCRIPT_URL + "?action=getAllData")
             .then(response => response.json())
             .then(data => {
-                dbData = data; renderWeeklyCalendar(); loadingEl.style.display = 'none';
-                if(data.members) {
-                     const mList = document.getElementById('memberList');
-                     mList.innerHTML = '';
-                     data.members.forEach(m => {
-                         const d = document.createElement('li'); d.className='member-card';
-                         d.innerHTML = `<img src="${m.avatar || 'https://api.dicebear.com/7.x/notionists/svg?seed='+m.name}" class="member-avatar"><div style="font-weight:bold;">${m.name}</div><div style="font-size:0.9em; color:#666;">${m.bio}</div>`;
-                         mList.appendChild(d);
-                     });
-                }
+                dbData = data; 
+                renderWeeklyCalendar(); 
+                renderRanking(); 
+                renderFeed(); 
+                renderMembers();
+                loadingEl.style.display = 'none';
             })
             .catch(e => { console.error(e); loadingEl.style.display='none'; });
     }
@@ -286,15 +444,14 @@
         document.getElementById('modalDateTitle').innerText = `${date} 기록`;
         document.getElementById('inputRating').value = "0.0";
         document.getElementById('taskItemsContainer').innerHTML = ''; addTaskItem();
-        const listEl = document.getElementById('othersList');
-        listEl.innerHTML = '';
+        const listEl = document.getElementById('othersList'); listEl.innerHTML = '';
+        
         const todaysTasks = dbData.tasks ? dbData.tasks.filter(t => t.date === date) : [];
         if(todaysTasks.length === 0) listEl.innerHTML = '<div style="text-align:center; color:#999; padding:10px;">기록 없음</div>';
         else {
             todaysTasks.forEach(t => {
                 const parsed = parseTaskContent(t.task);
-                const detailDiv = document.createElement('div');
-                detailDiv.className = 'detail-card';
+                const detailDiv = document.createElement('div'); detailDiv.className = 'detail-card';
                 let itemsHtml = '';
                 parsed.items.forEach(item => {
                     let typeClass = item.category === '업무' ? 'type-work' : item.category === '공부' ? 'type-study' : item.category === '회복' ? 'type-rest' : 'type-etc';
@@ -306,6 +463,15 @@
         }
         document.getElementById('taskModal').style.display = 'flex';
     }
+    
+    // 아바타 관련
+    function updateAvatarPreview() {
+        const style = document.getElementById('avatarStyle').value;
+        const seed = currentAvatarSeed || "default";
+        document.getElementById('avatarPreview').src = `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(seed)}`;
+    }
+    function randomizeAvatar() { currentAvatarSeed = Math.random().toString(36).substring(7); updateAvatarPreview(); }
+
     function closeModal() { document.getElementById('taskModal').style.display = 'none'; }
     function openTab(name, e) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -315,7 +481,6 @@
         if(name==='calendarTab') renderWeeklyCalendar();
     }
     window.onclick = function(e) { if(e.target == document.getElementById('taskModal')) closeModal(); }
-    function saveFeed() {} // 피드 기능 생략 (공간 절약)
 </script>
 </body>
 </html>
