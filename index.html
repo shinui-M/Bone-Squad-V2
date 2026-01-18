@@ -3,13 +3,13 @@
 <head>
     <script>
         // =====================================================================
-        // ▼▼▼ [필수] 구글 앱스 스크립트 새 배포 주소를 넣으세요 ▼▼▼
+        // ▼▼▼ [필수] 구글 앱스 스크립트 배포 주소를 따옴표 안에 넣으세요 ▼▼▼
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQzS1-qHwyY7o916H7hmW-wxs8Z9WrG3LmghR6iMuiYjDGURY2SDnnFjPjtiHv6x_6_A/exec"; 
         // =====================================================================
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>뼈갈단 V2</title>
+    <title>뼈갈단 스터디 통합 대시보드 (Final)</title>
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8f9fa; color: #333; margin: 0; }
         .banner { width: 100%; max-height: 300px; object-fit: cover; border-bottom: 3px solid #e74c3c; }
@@ -29,6 +29,7 @@
         .btn-submit { width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1em; transition: 0.3s; }
         .btn-submit:hover { background: #c0392b; }
 
+        /* 주간 달력 스타일 */
         .calendar-controls { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; font-size: 1.3em; font-weight: bold; color: #333; }
         .btn-move { background: none; border: none; color: #e74c3c; font-size: 1.5em; cursor: pointer; padding: 0 20px; }
         
@@ -47,6 +48,7 @@
         .mini-avatar { width: 20px; height: 20px; border-radius: 50%; background: #eee; object-fit: cover; }
         .rating-badge { margin-left: auto; font-weight: bold; color: #f1c40f; font-size: 0.9em; }
 
+        /* 입력 폼 스타일 */
         .input-group { margin-bottom: 15px; border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fafafa; }
         .input-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .type-select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 80px; }
@@ -54,19 +56,24 @@
         .btn-add { background: #34495e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
         .btn-remove { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         
+        /* 모달 스타일 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 600px; max-width: 95%; max-height: 90vh; display: flex; flex-direction: column; }
         .modal-header { color: #e74c3c; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2em; font-weight: bold; }
         .modal-body { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
         
+        /* 상세 보기 카드 스타일 (색상 적용됨) */
         .detail-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #bdc3c7; }
         .detail-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
         .detail-item { display: flex; margin-bottom: 5px; font-size: 0.95em; }
         .detail-type { font-weight: bold; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 8px; min-width: 40px; text-align: center; }
-        .type-work { background: #3498db; }
-        .type-study { background: #e74c3c; }
-        .type-rest { background: #2ecc71; }
-        .type-etc { background: #95a5a6; }
+        
+        /* [카테고리 색상 정의] */
+        .type-deep { background: #e74c3c; }      /* 몰입: 빨강 */
+        .type-grow { background: #2ecc71; }      /* 성장: 초록 */
+        .type-schedule { background: #3498db; }  /* 일정: 파랑 */
+        .type-rest { background: #f1c40f; color: #333; } /* 충전: 노랑 */
+        .type-etc { background: #95a5a6; }       /* 기타: 회색 */
 
         .member-form { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #eee; display:flex; flex-direction: column; align-items: center; }
         .avatar-preview-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 15px; }
@@ -239,6 +246,7 @@
             body.className = 'day-body';
             body.onclick = () => openModal(dateKey);
 
+            // 1. 제출한 사람 표시
             const todaysTasks = dbData.tasks ? dbData.tasks.filter(t => t.date === dateKey) : [];
             const submittedNames = new Set(todaysTasks.map(t => t.name));
 
@@ -255,6 +263,7 @@
                 body.appendChild(card);
             });
 
+            // 2. 제출 안 한 멤버 (Ghost)
             if (dbData.members) {
                 dbData.members.forEach(member => {
                     if (!submittedNames.has(member.name)) {
@@ -266,22 +275,34 @@
                     }
                 });
             }
+
             col.appendChild(header); col.appendChild(body); grid.appendChild(col);
         }
     }
 
     function changeWeek(days) { currentWeekStart.setDate(currentWeekStart.getDate() + days); renderWeeklyCalendar(); }
 
+    // --- 항목 추가 (카테고리: 몰입, 성장, 일정, 충전, 기타) ---
     function addTaskItem(initialData = null) {
         const container = document.getElementById('taskItemsContainer');
         const div = document.createElement('div');
         div.className = 'input-row';
-        div.innerHTML = `<select class="type-select"><option value="업무">업무</option><option value="공부">공부</option><option value="회복">회복</option><option value="기타">기타</option></select><input type="text" class="content-input" placeholder="내용을 입력하세요"><button class="btn-remove" onclick="this.parentElement.remove()">X</button>`;
+        div.innerHTML = `
+            <select class="type-select">
+                <option value="몰입">🔥 몰입</option>
+                <option value="성장">🌱 성장</option>
+                <option value="일정">📅 일정</option>
+                <option value="충전">🔋 충전</option>
+                <option value="기타">🎸 기타</option>
+            </select>
+            <input type="text" class="content-input" placeholder="내용을 입력하세요">
+            <button class="btn-remove" onclick="this.parentElement.remove()">X</button>
+        `;
         container.appendChild(div);
         if(initialData) { div.querySelector('.type-select').value = initialData.category; div.querySelector('.content-input').value = initialData.content; }
     }
 
-    // --- 모달 열기 (기존 데이터 불러오기 포함) ---
+    // --- 모달 열기 (기존 데이터 불러오기) ---
     function openModal(date) {
         selectedDateKey = date;
         const myName = document.getElementById('userName').value.trim();
@@ -313,7 +334,12 @@
                 const detailDiv = document.createElement('div'); detailDiv.className = 'detail-card';
                 let itemsHtml = '';
                 parsed.items.forEach(item => {
-                    let typeClass = item.category === '업무' ? 'type-work' : item.category === '공부' ? 'type-study' : item.category === '회복' ? 'type-rest' : 'type-etc';
+                    let typeClass = 'type-etc';
+                    if(item.category === '몰입') typeClass = 'type-deep';
+                    if(item.category === '성장') typeClass = 'type-grow';
+                    if(item.category === '일정') typeClass = 'type-schedule';
+                    if(item.category === '충전') typeClass = 'type-rest';
+                    
                     itemsHtml += `<div class="detail-item"><span class="detail-type ${typeClass}">${item.category}</span><span>${item.content}</span></div>`;
                 });
                 detailDiv.innerHTML = `<div class="detail-header"><span>${t.name}</span>${parsed.rating ? `<span style="color:#f1c40f;">★ ${parsed.rating}</span>` : ''}</div><div>${itemsHtml}</div>`;
@@ -369,8 +395,10 @@
         const taskString = JSON.stringify(taskObject);
         const newData = { action: 'saveTask', date: selectedDateKey, name: name, task: taskString };
         
+        // 프론트엔드: 기존 것 제거 후 새 것 추가 (업데이트 효과)
         dbData.tasks = dbData.tasks.filter(t => !(t.date === selectedDateKey && t.name === name));
         dbData.tasks.push(newData);
+        
         renderWeeklyCalendar(); closeModal();
         fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(newData) });
     }
