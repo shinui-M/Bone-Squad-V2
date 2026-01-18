@@ -35,6 +35,7 @@
         /* 주간 달력 스타일 */
         .calendar-controls { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; font-size: 1.3em; font-weight: bold; color: #333; }
         .btn-move { background: none; border: none; color: #e74c3c; font-size: 1.5em; cursor: pointer; padding: 0 20px; }
+        
         .weekly-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
         .day-column { background: #fff; border: 1px solid #eee; border-radius: 8px; min-height: 300px; display: flex; flex-direction: column; }
         .day-column.today { border: 2px solid #e74c3c; background-color: #fff5f5; }
@@ -43,11 +44,12 @@
         .day-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; gap: 5px; cursor: pointer; transition: 0.2s; }
         .day-body:hover { background-color: #fafafa; }
 
-        .submitter-card { background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; transition: 0.2s;}
+        /* 카드 스타일 (PC 기본) */
+        .submitter-card { background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; transition: 0.2s; white-space: nowrap; overflow: hidden; }
         .submitter-card.me { border-color: #e74c3c; background: #fff0f0; }
         .submitter-card.faint { opacity: 0.4; filter: grayscale(100%); background: #f5f5f5; border: 1px dashed #ccc; box-shadow: none; }
         .submitter-card.faint:hover { opacity: 0.8; filter: grayscale(0%); }
-        .mini-avatar { width: 20px; height: 20px; border-radius: 50%; background: #eee; object-fit: cover; }
+        .mini-avatar { width: 20px; height: 20px; border-radius: 50%; background: #eee; object-fit: cover; flex-shrink: 0; }
         .rating-badge { margin-left: auto; font-weight: bold; color: #f1c40f; font-size: 0.9em; }
 
         /* 입력 폼 스타일 */
@@ -104,20 +106,36 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .close-btn { cursor: pointer; font-size: 2em; line-height: 0.5; color: #999; }
 
-        /* 모바일 최적화 */
+        /* 🔥 [중요] 모바일 최적화 수정됨 */
         @media (max-width: 768px) {
             .container { padding: 15px; margin: 10px; }
             h2 { font-size: 1.5em; }
             .tab-link { padding: 10px 5px; font-size: 0.9em; min-width: auto; }
             .calendar-controls { font-size: 1em; }
             .btn-move { font-size: 1.2em; padding: 0 10px; }
-            .weekly-grid { gap: 5px; }
-            .day-header { font-size: 0.8em; padding: 5px; }
-            .day-column { min-height: 200px; }
-            .day-body { padding: 5px; }
-            .submitter-card { padding: 5px; font-size: 0.75em; flex-direction: column; text-align: center; gap: 2px;}
-            .mini-avatar { width: 20px; height: 20px; margin-bottom: 2px;}
-            .rating-badge { margin-left: 0; font-size: 0.8em; }
+            
+            .weekly-grid { gap: 4px; }
+            .day-header { font-size: 0.75em; padding: 4px 2px; }
+            .day-column { min-height: 180px; }
+            .day-body { padding: 4px; gap: 4px; }
+            
+            /* 카드 스타일: 강제로 한 줄 유지 */
+            .submitter-card { 
+                padding: 4px 2px; 
+                font-size: 0.7em; 
+                flex-direction: column; 
+                align-items: center;
+                gap: 2px;
+                border-radius: 4px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            .mini-avatar { width: 22px; height: 22px; margin: 0; }
+            
+            /* 모바일에서는 별점 숨김 (공간 부족) */
+            .rating-badge { display: none; }
+            
             .member-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .member-card { padding: 10px; }
             .member-avatar { width: 60px; height: 60px; }
@@ -208,7 +226,7 @@
                 <input type="number" id="inputRating" step="0.1" min="0" max="5" value="0.0" style="padding:5px; border:1px solid #ddd; border-radius:4px; width:100px;">
             </div>
             <div class="input-group">
-                <label style="font-weight:bold; display:block; margin-bottom:10px;">📝 상세 항목 </label>
+                <label style="font-weight:bold; display:block; margin-bottom:10px;">📝 상세 항목</label>
                 <div id="taskItemsContainer"></div>
                 <button class="btn-add" onclick="addTaskItem()">+ 항목 추가</button>
             </div>
@@ -243,6 +261,7 @@
         renderFeed();
     });
 
+    // --- 주간 달력 ---
     function renderWeeklyCalendar() {
         const grid = document.getElementById('weeklyCalendar');
         grid.innerHTML = '';
@@ -285,10 +304,10 @@
                 const memberInfo = dbData.members ? dbData.members.find(m => m.name === item.name) : null;
                 const avatarUrl = memberInfo && memberInfo.avatar ? memberInfo.avatar : `https://api.dicebear.com/7.x/notionists/svg?seed=${item.name}`;
                 
-                // [수정됨] 이름 3글자 이상이면 뒤 2글자만
+                // [이름 축약] 3글자 이상이면 뒤 2글자만
                 let displayName = item.name.length >= 3 ? item.name.slice(-2) : item.name;
 
-                card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${displayName}</span>${parsed.rating ? `<span class="rating-badge">★${parsed.rating}</span>` : ''}`;
+                card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${displayName}</span><span class="rating-badge">★${parsed.rating}</span>`;
                 body.appendChild(card);
             });
 
@@ -299,7 +318,6 @@
                         card.className = 'submitter-card faint'; 
                         const avatarUrl = member.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${member.name}`;
                         
-                        // [수정됨] 이름 3글자 이상이면 뒤 2글자만
                         let displayName = member.name.length >= 3 ? member.name.slice(-2) : member.name;
 
                         card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${displayName}</span>`;
