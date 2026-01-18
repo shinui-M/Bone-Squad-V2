@@ -4,7 +4,7 @@
     <script>
         // =====================================================================
         // ▼▼▼ [필수] 구글 앱스 스크립트 배포 주소를 따옴표 안에 넣으세요 ▼▼▼
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoN--kFk2enAJwnt2T_6TM0dXFgusmi9xh-ImeURvg7zZRgZiiHH8CpWthT93T_PvXjQ/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTAIBmB52PnfROPk_6zw7exS5s2xU78boQ4XjKe6UOQBR-fnUBJSUT_hfGXP6N-cY7tg/exec"; 
         // =====================================================================
     </script>
     <meta charset="UTF-8">
@@ -15,6 +15,7 @@
         .banner { width: 100%; max-height: 300px; object-fit: cover; border-bottom: 3px solid #e74c3c; }
         .container { max-width: 1200px; margin: 20px auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #eee; }
         
+        /* 탭 메뉴 */
         .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 20px; flex-wrap: wrap;}
         .tab-link { padding: 15px 10px; cursor: pointer; font-weight: bold; color: #999; transition: 0.3s; flex: 1; text-align: center; min-width: 80px; }
         .tab-link:hover { color: #e74c3c; background: #fff5f5; }
@@ -41,6 +42,7 @@
         .day-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; gap: 5px; cursor: pointer; transition: 0.2s; }
         .day-body:hover { background-color: #fafafa; }
 
+        /* 카드 스타일 */
         .submitter-card { background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; transition: 0.2s;}
         .submitter-card.me { border-color: #e74c3c; background: #fff0f0; }
         .submitter-card.faint { opacity: 0.4; filter: grayscale(100%); background: #f5f5f5; border: 1px dashed #ccc; box-shadow: none; }
@@ -56,34 +58,34 @@
         .btn-add { background: #34495e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
         .btn-remove { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         
-        /* 모달 스타일 */
+        /* 모달 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 600px; max-width: 95%; max-height: 90vh; display: flex; flex-direction: column; }
         .modal-header { color: #e74c3c; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2em; font-weight: bold; }
         .modal-body { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
         
-        /* 상세 보기 카드 스타일 (색상 적용됨) */
+        /* 상세 보기 카드 */
         .detail-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #bdc3c7; }
         .detail-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
         .detail-item { display: flex; margin-bottom: 5px; font-size: 0.95em; }
         .detail-type { font-weight: bold; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 8px; min-width: 40px; text-align: center; }
         
-        /* [카테고리 색상 정의] */
-        .type-deep { background: #e74c3c; }      /* 몰입: 빨강 */
-        .type-grow { background: #2ecc71; }      /* 성장: 초록 */
-        .type-schedule { background: #3498db; }  /* 일정: 파랑 */
-        .type-rest { background: #f1c40f; color: #333; } /* 충전: 노랑 */
-        .type-etc { background: #95a5a6; }       /* 기타: 회색 */
+        /* 카테고리 색상 */
+        .type-deep { background: #e74c3c; }      
+        .type-grow { background: #2ecc71; }      
+        .type-schedule { background: #3498db; }  
+        .type-rest { background: #f1c40f; color: #333; } 
+        .type-etc { background: #95a5a6; }       
 
-        /* 뼈이스북 및 댓글 스타일 (복구됨) */
+        /* 뼈이스북 & 댓글 */
         .feed-list { list-style: none; padding: 0; }
         .feed-item { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .feed-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
         .feed-img { max-width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
         
-        .comment-section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; }
-        .comment-list { list-style: none; padding: 0; margin-bottom: 15px; }
-        .comment-item { background: #fff; padding: 8px 12px; margin-bottom: 5px; border-radius: 6px; font-size: 0.9em; border: 1px solid #eee; display:flex; gap: 10px; }
+        .comment-section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; border-top: 1px solid #eee; }
+        .comment-list { list-style: none; padding: 0; margin-bottom: 10px; }
+        .comment-item { background: #fff; padding: 8px 10px; margin-bottom: 5px; border-radius: 6px; font-size: 0.85em; border: 1px solid #eee; display:flex; gap: 8px; }
         .comment-author { color: #e74c3c; font-weight: bold; white-space: nowrap; }
         .comment-content { color: #555; word-break: break-all; }
 
@@ -104,6 +106,31 @@
         .loading-spinner { border: 5px solid #f3f3f3; border-top: 5px solid #e74c3c; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .close-btn { cursor: pointer; font-size: 2em; line-height: 0.5; color: #999; }
+
+        /* 🔥 [중요] 모바일 최적화 (화면이 작을 때 적용되는 스타일) */
+        @media (max-width: 768px) {
+            .container { padding: 15px; margin: 10px; }
+            h2 { font-size: 1.5em; }
+            .tab-link { padding: 10px 5px; font-size: 0.9em; min-width: auto; }
+            .calendar-controls { font-size: 1em; }
+            .btn-move { font-size: 1.2em; padding: 0 10px; }
+            
+            /* 달력 날짜 좁게 */
+            .weekly-grid { gap: 5px; }
+            .day-header { font-size: 0.8em; padding: 5px; }
+            .day-column { min-height: 200px; }
+            .day-body { padding: 5px; }
+            
+            /* 카드 작게 */
+            .submitter-card { padding: 5px; font-size: 0.75em; flex-direction: column; text-align: center; gap: 2px;}
+            .mini-avatar { width: 20px; height: 20px; margin-bottom: 2px;}
+            .rating-badge { margin-left: 0; font-size: 0.8em; }
+
+            /* 갤러리 2열 배치 */
+            .member-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .member-card { padding: 10px; }
+            .member-avatar { width: 60px; height: 60px; }
+        }
     </style>
 </head>
 <body>
@@ -129,9 +156,9 @@
         <div class="sub-title">이번 주, 얼마나 뼈를 갈았는가?</div>
         
         <div class="calendar-controls">
-            <button class="btn-move" onclick="changeWeek(-7)">◀ 지난주</button>
-            <span id="currentWeekRange" style="margin: 0 20px;"></span>
-            <button class="btn-move" onclick="changeWeek(7)">다음주 ▶</button>
+            <button class="btn-move" onclick="changeWeek(-7)">◀</button>
+            <span id="currentWeekRange" style="margin: 0 10px;"></span>
+            <button class="btn-move" onclick="changeWeek(7)">▶</button>
             <button onclick="loadData()" style="font-size:0.8em; cursor:pointer; background:none; border:none; color:#e74c3c;">🔄</button>
         </div>
 
@@ -215,101 +242,4 @@
             currentAvatarSeed = "bone";
         }
         updateAvatarPreview();
-        addTaskItem(); 
-        loadData();
-    };
-
-    document.getElementById('userName').addEventListener('input', function() {
-        localStorage.setItem('study_username', this.value);
-        if(this.value) { currentAvatarSeed = this.value; updateAvatarPreview(); }
-    });
-
-    // --- 주간 달력 ---
-    function renderWeeklyCalendar() {
-        const grid = document.getElementById('weeklyCalendar');
-        grid.innerHTML = '';
-        const weekEnd = new Date(currentWeekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        document.getElementById('currentWeekRange').innerText = `${currentWeekStart.getMonth()+1}.${currentWeekStart.getDate()} ~ ${weekEnd.getMonth()+1}.${weekEnd.getDate()}`;
-        
-        const myName = document.getElementById('userName').value.trim();
-        const days = ['일', '월', '화', '수', '목', '금', '토'];
-
-        for (let i = 0; i < 7; i++) {
-            const dateObj = new Date(currentWeekStart);
-            dateObj.setDate(dateObj.getDate() + i);
-            const dateKey = `${dateObj.getFullYear()}-${dateObj.getMonth()+1}-${dateObj.getDate()}`;
-            
-            const col = document.createElement('div');
-            col.className = 'day-column';
-            const todayKey = new Date().getFullYear() + '-' + (new Date().getMonth()+1) + '-' + new Date().getDate();
-            if (dateKey === todayKey) col.classList.add('today');
-
-            const header = document.createElement('div');
-            header.className = 'day-header';
-            if(i===0) header.classList.add('sun');
-            if(i===6) header.classList.add('sat');
-            header.innerHTML = `${days[i]} <span style="font-size:0.8em; color:#999;">(${dateObj.getDate()}일)</span>`;
-            
-            const body = document.createElement('div');
-            body.className = 'day-body';
-            body.onclick = () => openModal(dateKey);
-
-            // 1. 제출한 사람 표시
-            const todaysTasks = dbData.tasks ? dbData.tasks.filter(t => t.date === dateKey) : [];
-            const submittedNames = new Set(todaysTasks.map(t => t.name));
-
-            todaysTasks.forEach(item => {
-                let parsed = parseTaskContent(item.task);
-                const card = document.createElement('div');
-                card.className = 'submitter-card';
-                if (myName && item.name === myName) card.classList.add('me');
-                
-                const memberInfo = dbData.members ? dbData.members.find(m => m.name === item.name) : null;
-                const avatarUrl = memberInfo && memberInfo.avatar ? memberInfo.avatar : `https://api.dicebear.com/7.x/notionists/svg?seed=${item.name}`;
-                
-                card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${item.name}</span>${parsed.rating ? `<span class="rating-badge">★${parsed.rating}</span>` : ''}`;
-                body.appendChild(card);
-            });
-
-            // 2. 제출 안 한 멤버 (Ghost)
-            if (dbData.members) {
-                dbData.members.forEach(member => {
-                    if (!submittedNames.has(member.name)) {
-                        const card = document.createElement('div');
-                        card.className = 'submitter-card faint'; 
-                        const avatarUrl = member.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${member.name}`;
-                        card.innerHTML = `<img src="${avatarUrl}" class="mini-avatar"><span>${member.name}</span>`;
-                        body.appendChild(card);
-                    }
-                });
-            }
-            col.appendChild(header); col.appendChild(body); grid.appendChild(col);
-        }
-    }
-
-    function changeWeek(days) { currentWeekStart.setDate(currentWeekStart.getDate() + days); renderWeeklyCalendar(); }
-
-    // --- 항목 추가 (몰입, 성장, 일정, 충전, 기타) ---
-    function addTaskItem(initialData = null) {
-        const container = document.getElementById('taskItemsContainer');
-        const div = document.createElement('div');
-        div.className = 'input-row';
-        div.innerHTML = `<select class="type-select"><option value="몰입">🔥 몰입</option><option value="성장">🌱 성장</option><option value="일정">📅 일정</option><option value="충전">🔋 충전</option><option value="기타">🎸 기타</option></select><input type="text" class="content-input" placeholder="내용을 입력하세요"><button class="btn-remove" onclick="this.parentElement.remove()">X</button>`;
-        container.appendChild(div);
-        if(initialData) { div.querySelector('.type-select').value = initialData.category; div.querySelector('.content-input').value = initialData.content; }
-    }
-
-    // --- 모달 열기 ---
-    function openModal(date) {
-        selectedDateKey = date;
-        const myName = document.getElementById('userName').value.trim();
-        document.getElementById('modalDateTitle').innerText = `${date} 기록`;
-
-        const myTask = dbData.tasks ? dbData.tasks.find(t => t.date === date && t.name === myName) : null;
-        const container = document.getElementById('taskItemsContainer');
-        container.innerHTML = '';
-
-        if (myTask) {
-            const parsed = parseTaskContent(myTask.task);
-            document.getElementById('inputRating').value = parsed.rating || "0
+        addTaskItem();
