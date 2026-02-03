@@ -4,7 +4,7 @@
     <script>
         // =====================================================================
         // ▼▼▼ [필수] 구글 앱스 스크립트 배포 주소를 따옴표 안에 넣으세요 ▼▼▼
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8C--FAlM3wbsMvdLBTsQ_fHxSdGFy0zDUVm1tRVJxekoj8ssS3iSnPvU2Z-989GYF/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8OTNY8sRKoltf_5B_5uOaHRxJjpdkmU4t3M6bwHcBPpje6EKsfbKe9GxzG4JmfOfWJA/exec"; 
         // =====================================================================
     </script>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="theme-color" content="#e74c3c">
-    <title>뼈갈단 V3 </title>
+    <title>뼈갈단 V2 </title>
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8f9fa; color: #333; margin: 0; }
         .banner { width: 100%; max-height: 300px; object-fit: cover; border-bottom: 3px solid #e74c3c; }
@@ -27,16 +27,34 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 공통 UI */
         h2 { color: #e74c3c; text-align: center; margin-top: 0; }
         .sub-title { color: #666; text-align: center; margin-bottom: 20px; }
         input.name-input { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #e74c3c; border-radius: 8px; background: #fff; color: #333; text-align: center; font-size: 1.1em; font-weight:bold; box-sizing: border-box; }
         .btn-submit { width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1em; transition: 0.3s; margin-top:10px;}
         .btn-submit:hover { background: #c0392b; }
         textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; resize: vertical; }
-        input[type="text"], input[type="date"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; margin-bottom: 5px; }
+        input[type="text"], input[type="number"], input[type="date"], input[type="file"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; background: #fff; }
 
-        /* 🟢 [그룹 탭 스타일] */
+        /* 🔥 [복구] 주간 달력 스타일 (V17 버전 스타일 적용) */
+        .calendar-controls { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; font-size: 1.3em; font-weight: bold; color: #333; }
+        .btn-move { background: none; border: none; color: #e74c3c; font-size: 1.5em; cursor: pointer; padding: 0 20px; }
+        
+        /* 🔥 중요: grid 설정 엄격하게 복구 */
+        .weekly-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; width: 100%; box-sizing: border-box; }
+        .day-column { background: #fff; border: 1px solid #eee; border-radius: 8px; min-height: 300px; display: flex; flex-direction: column; overflow: hidden; }
+        .day-column.today { border: 2px solid #e74c3c; background-color: #fff5f5; }
+        .day-header { padding: 10px; text-align: center; border-bottom: 1px solid #eee; font-weight: bold; background: #f9f9f9; width: 100%; box-sizing: border-box; }
+        .day-header.sun { color: #e74c3c; } .day-header.sat { color: #3498db; }
+        .day-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; gap: 5px; cursor: pointer; transition: 0.2s; overflow-y: auto; }
+        .day-body:hover { background-color: #fafafa; }
+
+        .submitter-card { background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; transition: 0.2s; white-space: nowrap; overflow: hidden; }
+        .submitter-card.me { border-color: #e74c3c; background: #fff0f0; }
+        .submitter-card.faint { opacity: 0.4; filter: grayscale(100%); background: #f5f5f5; border: 1px dashed #ccc; box-shadow: none; }
+        .mini-avatar { width: 20px; height: 20px; border-radius: 50%; background: #eee; object-fit: cover; flex-shrink: 0; }
+        .rating-badge { margin-left: auto; font-weight: bold; color: #f1c40f; font-size: 0.9em; }
+
+        /* 그룹 스타일 */
         .group-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .group-card { border: 1px solid #eee; border-radius: 12px; overflow: hidden; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); background: #fff; }
         .group-card:hover { transform: translateY(-5px); border-color: #e74c3c; }
@@ -45,7 +63,6 @@
         .group-title { font-weight: bold; font-size: 1.2em; margin-bottom: 5px; color: #333; }
         .group-desc { color: #666; font-size: 0.9em; }
 
-        /* 🟢 [그룹 상세 페이지] */
         #groupDetailView { display: none; }
         .group-header { border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
         .btn-back { background: #eee; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer; margin-bottom: 10px; font-weight: bold; color: #555; }
@@ -55,7 +72,7 @@
         .btn-join { background: #2ecc71; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-left: auto; font-weight: bold; }
         .btn-leave { background: #95a5a6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-left: auto; font-weight: bold; }
 
-        /* 🥗 [다이어트 로그 스타일] */
+        /* 다이어트 로그 */
         .diet-card { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; overflow: hidden; background: #fff; }
         .diet-header { background: #f1f1f1; padding: 10px 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .diet-body { padding: 15px; }
@@ -63,32 +80,30 @@
         .diet-label { width: 50px; font-weight: bold; color: #e74c3c; flex-shrink: 0; }
         .diet-content { flex-grow: 1; color: #555; white-space: pre-wrap; }
 
-        /* 기존 스타일 (주간달력, 피드 등) */
-        .calendar-controls { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; font-size: 1.3em; font-weight: bold; color: #333; }
-        .btn-move { background: none; border: none; color: #e74c3c; font-size: 1.5em; cursor: pointer; padding: 0 20px; }
-        .weekly-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-        .day-column { background: #fff; border: 1px solid #eee; border-radius: 8px; min-height: 300px; display: flex; flex-direction: column; }
-        .day-column.today { border: 2px solid #e74c3c; background-color: #fff5f5; }
-        .day-header { padding: 10px; text-align: center; border-bottom: 1px solid #eee; font-weight: bold; background: #f9f9f9; border-radius: 8px 8px 0 0; }
-        .day-header.sun { color: #e74c3c; } .day-header.sat { color: #3498db; }
-        .day-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; gap: 5px; cursor: pointer; transition: 0.2s; }
-        .day-body:hover { background-color: #fafafa; }
-        .submitter-card { background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; }
-        .submitter-card.me { border-color: #e74c3c; background: #fff0f0; }
-        .submitter-card.faint { opacity: 0.4; filter: grayscale(100%); background: #f5f5f5; border: 1px dashed #ccc; box-shadow: none; }
-        .mini-avatar { width: 20px; height: 20px; border-radius: 50%; background: #eee; object-fit: cover; flex-shrink: 0; }
-        .rating-badge { margin-left: auto; font-weight: bold; color: #f1c40f; font-size: 0.9em; }
-        
+        /* 수정/삭제 버튼 */
+        .btn-edit { color: #3498db; border: 1px solid #ddd; background: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; cursor: pointer; margin-left: 5px;}
+        .btn-delete { color: #e74c3c; border: 1px solid #ddd; background: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; cursor: pointer; margin-left: 5px;}
+
         .input-group { margin-bottom: 15px; border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fafafa; }
         .input-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .type-select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 80px; }
         .content-input { flex-grow: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
         .btn-add { background: #34495e; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
         .btn-remove { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 600px; max-width: 95%; max-height: 90vh; display: flex; flex-direction: column; }
         .modal-header { color: #e74c3c; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2em; font-weight: bold; }
         .modal-body { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
+        
+        /* 상세 보기 카드 */
+        .detail-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #bdc3c7; }
+        .detail-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
+        .detail-item { display: flex; margin-bottom: 5px; font-size: 0.95em; }
+        .detail-type { font-weight: bold; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 8px; min-width: 40px; text-align: center; }
+        .type-deep { background: #e74c3c; } .type-grow { background: #2ecc71; } .type-schedule { background: #3498db; } .type-rest { background: #f1c40f; color: #333; } .type-etc { background: #95a5a6; }       
+
+        /* 피드 & 댓글 */
         .feed-list { list-style: none; padding: 0; }
         .feed-item { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .feed-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
@@ -98,6 +113,7 @@
         .comment-item { background: #fff; padding: 8px 10px; margin-bottom: 5px; border-radius: 6px; font-size: 0.85em; border: 1px solid #eee; display:flex; gap: 8px; }
         .comment-author { color: #e74c3c; font-weight: bold; white-space: nowrap; }
         .comment-content { color: #555; word-break: break-all; }
+
         .member-form { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #eee; display:flex; flex-direction: column; align-items: center; }
         .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
         .member-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -109,15 +125,32 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .close-btn { cursor: pointer; font-size: 2em; line-height: 0.5; color: #999; }
 
+        /* 🔥 [복구] 모바일 최적화 (V17 기반) */
         @media (max-width: 768px) {
             .container { padding: 15px; margin: 10px; }
+            h2 { font-size: 1.5em; }
+            .tab-link { padding: 10px 5px; font-size: 0.9em; min-width: auto; }
+            .calendar-controls { font-size: 1em; }
+            .btn-move { font-size: 1.2em; padding: 0 10px; }
+            
             .weekly-grid { gap: 4px; }
             .day-header { font-size: 0.75em; padding: 4px 2px; }
-            .day-column { min-height: 180px; }
+            .day-column { min-height: 200px; } /* 최소 높이 확보 */
             .day-body { padding: 4px; gap: 4px; }
-            .submitter-card { padding: 4px 2px; font-size: 0.7em; flex-direction: column; align-items: center; gap: 2px; border-radius: 4px; width: 100%; box-sizing: border-box; }
+            
+            .submitter-card { 
+                padding: 4px 2px; 
+                font-size: 0.7em; 
+                flex-direction: column; 
+                align-items: center;
+                gap: 2px;
+                border-radius: 4px;
+                width: 100%;
+                box-sizing: border-box;
+            }
             .mini-avatar { width: 22px; height: 22px; margin: 0; }
-            .rating-badge { display: none; }
+            .rating-badge { display: none; } /* 별점 숨김 */
+            
             .member-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         }
     </style>
@@ -195,7 +228,6 @@
                     <button id="btnGroupAction" class="btn-join" onclick="toggleGroupJoin()">참여</button>
                 </div>
             </div>
-
             <div id="groupContentArea"></div>
         </div>
     </div>
@@ -232,7 +264,7 @@
             <h4 style="color:#e74c3c;">📋 오늘의 기록</h4>
             <div id="othersList"></div>
             <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
-            <h4 style="color:#e74c3c;">✍️ 성과 작성하기</h4>
+            <h4 style="color:#e74c3c;">✍️ 성과 작성하기 (수정 가능)</h4>
             <div class="input-group">
                 <label style="font-weight:bold; display:block; margin-bottom:5px;">⭐ 평점 (0.0~5.0)</label>
                 <input type="number" id="inputRating" step="0.1" min="0" max="5" value="0.0" style="width:100px;">
@@ -242,7 +274,7 @@
                 <div id="taskItemsContainer"></div>
                 <button class="btn-add" onclick="addTaskItem()">+ 추가</button>
             </div>
-            <button class="btn-submit" onclick="saveTask()">제출하기</button>
+            <button class="btn-submit" onclick="saveTask()">제출하기 (수정 저장)</button>
         </div>
     </div>
 </div>
@@ -254,7 +286,7 @@
             <span class="close-btn" onclick="document.getElementById('dietModal').style.display='none'">&times;</span>
         </div>
         <div class="modal-body">
-            <input type="date" id="inputDietDate" style="width:100%;">
+            <input type="date" id="inputDietDate" style="width:100%;" onchange="checkExistingDietLog()">
             <div class="input-group">
                 <label>🌅 아침</label><input type="text" id="dietBreakfast" placeholder="아침 식단">
                 <label>☀️ 점심</label><input type="text" id="dietLunch" placeholder="점심 식단">
@@ -262,7 +294,7 @@
                 <label>🍪 간식</label><input type="text" id="dietSnack" placeholder="간식">
                 <label>🏃 운동</label><textarea id="dietExercise" placeholder="운동 내용" style="height:60px;"></textarea>
             </div>
-            <button class="btn-submit" onclick="saveDietLog()">기록 저장</button>
+            <button class="btn-submit" onclick="saveDietLog()">기록 저장 (수정)</button>
         </div>
     </div>
 </div>
@@ -270,13 +302,10 @@
 <script>
     let currentWeekStart = new Date();
     currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
-    
-    // 데이터 저장소
     let dbData = { tasks: [], feeds: [], comments: [], members: [], groupMembers: [], groupPosts: [], dietLogs: [] };
-    
     let selectedDateKey = null;
     let currentAvatarSeed = "";
-    let currentGroup = null; // 현재 선택된 그룹 이름
+    let currentGroup = null;
 
     window.onload = function() {
         const savedName = localStorage.getItem('study_username');
@@ -295,7 +324,7 @@
         localStorage.setItem('study_username', this.value);
         if(this.value) { currentAvatarSeed = this.value; updateAvatarPreview(); }
         renderFeed();
-        if(currentGroup) enterGroup(currentGroup); // 그룹 화면 갱신
+        if(currentGroup) enterGroup(currentGroup);
     });
 
     function loadData() {
@@ -309,7 +338,7 @@
                 renderWeeklyCalendar(); 
                 renderFeed(); 
                 renderMembers();
-                if(currentGroup) enterGroup(currentGroup); // 데이터 갱신 시 그룹 화면도 갱신
+                if(currentGroup) enterGroup(currentGroup);
                 loadingEl.style.display = 'none';
             })
             .catch(e => { console.error(e); loadingEl.style.display='none'; });
@@ -325,10 +354,9 @@
         renderGroupMembers();
         
         const contentArea = document.getElementById('groupContentArea');
-        contentArea.innerHTML = ''; // 초기화
+        contentArea.innerHTML = ''; 
 
         if (groupName === '오픽 스터디') {
-            // 오픽 스터디: 게시판 형태
             contentArea.innerHTML = `
                 <div style="margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fff;">
                     <textarea id="groupInputPost" class="feed-input" placeholder="오픽 공부 인증이나 질문을 남겨보세요!"></textarea>
@@ -338,7 +366,6 @@
             `;
             renderGroupPosts();
         } else if (groupName === '뼈만 남는 다이어트') {
-            // 다이어트: 식단 기록 형태
             contentArea.innerHTML = `
                 <div style="text-align:right; margin-bottom:10px;">
                     <button class="btn-submit" style="width:auto; padding:8px 15px;" onclick="openDietModal()">+ 기록 작성</button>
@@ -359,30 +386,15 @@
         const listEl = document.getElementById('groupMemberList');
         const btn = document.getElementById('btnGroupAction');
         const myName = document.getElementById('userName').value.trim();
-        
         listEl.innerHTML = '';
-        
-        // 현재 그룹 멤버 필터링
         const members = dbData.groupMembers ? dbData.groupMembers.filter(m => m.groupName === currentGroup) : [];
         const isMember = members.some(m => m.name === myName);
-
-        // 버튼 상태 변경
-        if (isMember) {
-            btn.innerText = "탈퇴";
-            btn.className = "btn-leave";
-            btn.onclick = () => leaveGroup();
-        } else {
-            btn.innerText = "참여";
-            btn.className = "btn-join";
-            btn.onclick = () => joinGroup();
-        }
-
+        if (isMember) { btn.innerText = "탈퇴"; btn.className = "btn-leave"; btn.onclick = () => leaveGroup(); } 
+        else { btn.innerText = "참여"; btn.className = "btn-join"; btn.onclick = () => joinGroup(); }
         members.forEach(m => {
-            const badge = document.createElement('div');
-            badge.className = 'member-badge';
+            const badge = document.createElement('div'); badge.className = 'member-badge';
             const avatar = m.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${m.name}`;
-            badge.innerHTML = `<img src="${avatar}">${m.name}`;
-            listEl.appendChild(badge);
+            badge.innerHTML = `<img src="${avatar}">${m.name}`; listEl.appendChild(badge);
         });
     }
 
@@ -391,39 +403,44 @@
         if(!name) { alert("이름을 먼저 입력하세요."); return; }
         const myProfile = dbData.members.find(m => m.name === name);
         const avatar = myProfile ? myProfile.avatar : `https://api.dicebear.com/7.x/notionists/svg?seed=${name}`;
-
-        // 프론트 즉시 반영
         dbData.groupMembers.push({ groupName: currentGroup, name: name, avatar: avatar });
         renderGroupMembers();
-
         fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'joinGroup', groupName: currentGroup, name: name, avatar: avatar }) });
     }
 
     function leaveGroup() {
         const name = document.getElementById('userName').value.trim();
         if(!confirm("정말 탈퇴하시겠습니까?")) return;
-        
-        // 프론트 즉시 반영
         dbData.groupMembers = dbData.groupMembers.filter(m => !(m.groupName === currentGroup && m.name === name));
         renderGroupMembers();
-
         fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'leaveGroup', groupName: currentGroup, name: name }) });
     }
 
-    // --- 오픽 스터디 (게시판) ---
+    // --- 오픽 스터디 (게시판 + 수정기능) ---
     function renderGroupPosts() {
         const listEl = document.getElementById('groupPostList');
         if(!listEl) return;
         listEl.innerHTML = '';
+        const myName = document.getElementById('userName').value.trim();
         const posts = dbData.groupPosts ? dbData.groupPosts.filter(p => p.groupName === currentGroup) : [];
         
         [...posts].reverse().forEach(post => {
             const li = document.createElement('li'); li.className = 'feed-item';
             const dateStr = new Date(post.timestamp).toLocaleString();
-            li.innerHTML = `
-                <div class="feed-header"><span style="font-weight:bold;">${post.name}</span><span style="font-size:0.8em; color:#999;">${dateStr}</span></div>
-                <div style="white-space:pre-wrap;">${post.content}</div>
+            let actionBtns = "";
+            if(post.name === myName) {
+                actionBtns = `
+                    <button class="btn-edit" onclick="editGroupPost('${post.id}', '${encodeURIComponent(post.content)}')">수정</button>
+                    <button class="btn-delete" onclick="deleteGroupPost('${post.id}')">삭제</button>
                 `;
+            }
+            li.innerHTML = `
+                <div class="feed-header">
+                    <div><span style="font-weight:bold;">${post.name}</span><span style="font-size:0.8em; color:#999; margin-left:8px;">${dateStr}</span></div>
+                    <div>${actionBtns}</div>
+                </div>
+                <div style="white-space:pre-wrap;">${post.content}</div>
+            `;
             listEl.appendChild(li);
         });
     }
@@ -432,36 +449,48 @@
         const name = document.getElementById('userName').value.trim();
         const content = document.getElementById('groupInputPost').value.trim();
         if(!name || !content) return;
-        
-        // 참여자인지 확인
         const members = dbData.groupMembers.filter(m => m.groupName === currentGroup);
         if(!members.some(m => m.name === name)) { alert("그룹에 참여해야 글을 쓸 수 있습니다."); return; }
-
         const newData = { action: 'saveGroupPost', id: 'gp_' + Date.now(), groupName: currentGroup, name: name, content: content, timestamp: new Date().toISOString() };
-        
-        // 프론트 반영
         if(!dbData.groupPosts) dbData.groupPosts = [];
         dbData.groupPosts.push(newData);
         renderGroupPosts();
         document.getElementById('groupInputPost').value = '';
-
         fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(newData) });
     }
 
-    // --- 다이어트 로그 ---
+    function editGroupPost(id, oldContentEncoded) {
+        const newContent = prompt("내용을 수정하세요:", decodeURIComponent(oldContentEncoded));
+        if (newContent === null) return;
+        const name = document.getElementById('userName').value.trim();
+        
+        // 프론트 업데이트
+        const post = dbData.groupPosts.find(p => p.id === id);
+        if(post) post.content = newContent;
+        renderGroupPosts();
+
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'editGroupPost', id: id, name: name, groupName: currentGroup, content: newContent }) });
+    }
+
+    function deleteGroupPost(id) {
+        if(!confirm("삭제하시겠습니까?")) return;
+        const name = document.getElementById('userName').value.trim();
+        dbData.groupPosts = dbData.groupPosts.filter(p => p.id !== id);
+        renderGroupPosts();
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteGroupPost', id: id, name: name }) });
+    }
+
+    // --- 다이어트 로그 (불러오기 기능 추가) ---
     function renderDietLogs() {
         const listEl = document.getElementById('dietLogList');
         if(!listEl) return;
         listEl.innerHTML = '';
         const logs = dbData.dietLogs ? dbData.dietLogs.filter(l => l.groupName === currentGroup) : [];
-        
-        // 날짜별 정렬 (최신순)
         logs.sort((a,b) => new Date(b.date) - new Date(a.date));
 
         logs.forEach(log => {
             let content = {};
             try { content = JSON.parse(log.content); } catch(e) {}
-            
             const div = document.createElement('div');
             div.className = 'diet-card';
             div.innerHTML = `
@@ -480,17 +509,34 @@
 
     function openDietModal() {
         const name = document.getElementById('userName').value.trim();
-        // 참여자 확인
         const members = dbData.groupMembers.filter(m => m.groupName === currentGroup);
         if(!members.some(m => m.name === name)) { alert("그룹에 참여해야 기록할 수 있습니다."); return; }
 
         document.getElementById('inputDietDate').valueAsDate = new Date();
-        document.getElementById('dietBreakfast').value = '';
-        document.getElementById('dietLunch').value = '';
-        document.getElementById('dietDinner').value = '';
-        document.getElementById('dietSnack').value = '';
-        document.getElementById('dietExercise').value = '';
+        checkExistingDietLog(); // 날짜 선택시 기존 데이터 로드
         document.getElementById('dietModal').style.display = 'flex';
+    }
+
+    function checkExistingDietLog() {
+        const name = document.getElementById('userName').value.trim();
+        const date = document.getElementById('inputDietDate').value;
+        const log = dbData.dietLogs.find(l => l.date === date && l.groupName === currentGroup && l.name === name);
+        
+        if (log) {
+            let c = {}; try { c = JSON.parse(log.content); } catch(e) {}
+            document.getElementById('dietBreakfast').value = c.breakfast || '';
+            document.getElementById('dietLunch').value = c.lunch || '';
+            document.getElementById('dietDinner').value = c.dinner || '';
+            document.getElementById('dietSnack').value = c.snack || '';
+            document.getElementById('dietExercise').value = c.exercise || '';
+        } else {
+            // 없으면 빈칸
+            document.getElementById('dietBreakfast').value = '';
+            document.getElementById('dietLunch').value = '';
+            document.getElementById('dietDinner').value = '';
+            document.getElementById('dietSnack').value = '';
+            document.getElementById('dietExercise').value = '';
+        }
     }
 
     function saveDietLog() {
@@ -506,25 +552,36 @@
             exercise: document.getElementById('dietExercise').value
         };
 
-        const newData = { 
-            action: 'saveDietLog', 
-            date: date, 
-            groupName: currentGroup, 
-            name: name, 
-            content: JSON.stringify(content) 
-        };
-
-        // 프론트 반영 (기존 거 있으면 제거 후 추가)
+        const newData = { action: 'saveDietLog', date: date, groupName: currentGroup, name: name, content: JSON.stringify(content) };
         dbData.dietLogs = dbData.dietLogs.filter(l => !(l.date === date && l.groupName === currentGroup && l.name === name));
         dbData.dietLogs.push(newData);
         renderDietLogs();
         document.getElementById('dietModal').style.display = 'none';
-
         fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(newData) });
     }
 
+    // --- 피드 수정 (추가) ---
+    function editFeed(id, oldContentEncoded) {
+        const newContent = prompt("내용을 수정하세요:", decodeURIComponent(oldContentEncoded));
+        if (newContent === null) return;
+        const name = document.getElementById('userName').value.trim();
+        
+        // 프론트 업데이트
+        const feed = dbData.feeds.find(f => f.id === id);
+        let imgUrl = "";
+        try { // 기존 이미지 보존
+            const parsed = JSON.parse(feed.content);
+            imgUrl = parsed.img || "";
+        } catch(e) {}
+        
+        const newFeedData = { text: newContent, img: imgUrl };
+        if(feed) feed.content = JSON.stringify(newFeedData);
+        renderFeed();
+
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'editFeed', id: id, name: name, content: JSON.stringify(newFeedData) }) });
+    }
+
     // --- 기존 공통 함수들 (달력, 피드, 멤버 등) ---
-    // (V17의 로직과 동일하게 유지)
     function renderWeeklyCalendar() {
         const grid = document.getElementById('weeklyCalendar');
         grid.innerHTML = '';
@@ -560,8 +617,23 @@
     }
     function changeWeek(days) { currentWeekStart.setDate(currentWeekStart.getDate() + days); renderWeeklyCalendar(); }
     function addTaskItem(initialData = null) { const container = document.getElementById('taskItemsContainer'); const div = document.createElement('div'); div.className = 'input-row'; div.innerHTML = `<select class="type-select"><option value="몰입">🔥 몰입</option><option value="성장">🌱 성장</option><option value="일정">📅 일정</option><option value="충전">🔋 충전</option><option value="기타">🎸 기타</option></select><input type="text" class="content-input" placeholder="내용을 입력하세요"><button class="btn-remove" onclick="this.parentElement.remove()">X</button>`; container.appendChild(div); if(initialData) { div.querySelector('.type-select').value = initialData.category; div.querySelector('.content-input').value = initialData.content; } }
+    
+    // 성과 모달 열기 (기존 데이터 로드)
     function openModal(date) { selectedDateKey = date; const myName = document.getElementById('userName').value.trim(); document.getElementById('modalDateTitle').innerText = `${date} 기록`; const myTask = dbData.tasks ? dbData.tasks.find(t => t.date === date && t.name === myName) : null; const container = document.getElementById('taskItemsContainer'); container.innerHTML = ''; if (myTask) { const parsed = parseTaskContent(myTask.task); document.getElementById('inputRating').value = parsed.rating || "0.0"; if (parsed.items && parsed.items.length > 0) { parsed.items.forEach(item => addTaskItem(item)); } else { addTaskItem(); } } else { document.getElementById('inputRating').value = "0.0"; addTaskItem(); } const listEl = document.getElementById('othersList'); listEl.innerHTML = ''; const todaysTasks = dbData.tasks ? dbData.tasks.filter(t => t.date === date) : []; if(todaysTasks.length === 0) listEl.innerHTML = '<div style="text-align:center; color:#999; padding:10px;">기록 없음</div>'; else { todaysTasks.forEach(t => { const parsed = parseTaskContent(t.task); const detailDiv = document.createElement('div'); detailDiv.className = 'detail-card'; let itemsHtml = ''; parsed.items.forEach(item => { let typeClass = 'type-etc'; if(item.category === '몰입') typeClass = 'type-deep'; if(item.category === '성장') typeClass = 'type-grow'; if(item.category === '일정') typeClass = 'type-schedule'; if(item.category === '충전') typeClass = 'type-rest'; itemsHtml += `<div class="detail-item"><span class="detail-type ${typeClass}">${item.category}</span><span>${item.content}</span></div>`; }); detailDiv.innerHTML = `<div class="detail-header"><span>${t.name}</span>${parsed.rating ? `<span style="color:#f1c40f;">★ ${parsed.rating}</span>` : ''}</div><div>${itemsHtml}</div>`; listEl.appendChild(detailDiv); }); } document.getElementById('taskModal').style.display = 'flex'; }
-    function renderFeed() { const listEl = document.getElementById('feedList'); listEl.innerHTML = ''; if (!dbData.feeds || dbData.feeds.length === 0) { listEl.innerHTML = '<li style="text-align:center; padding:20px; color:#999;">첫 글을 남겨보세요!</li>'; return; } const myName = document.getElementById('userName').value.trim(); [...dbData.feeds].reverse().forEach(feed => { const li = document.createElement('li'); li.className = 'feed-item'; let content = feed.content; let imgHtml = ""; try { if(content.startsWith("{")) { const parsed = JSON.parse(content); content = parsed.text; if(parsed.img) imgHtml = `<img src="${parsed.img}" class="feed-img">`; } } catch(e) {} const myComments = dbData.comments ? dbData.comments.filter(c => c.feedId === feed.id) : []; let commentHtml = ''; myComments.forEach(c => { commentHtml += `<li class="comment-item"><span class="comment-author">${c.name}</span><span class="comment-content">${c.content}</span></li>`; }); const dateStr = new Date(feed.timestamp).toLocaleString(); let deleteBtn = ""; if(myName && feed.name === myName) { deleteBtn = `<button class="btn-delete" onclick="deleteFeed('${feed.id}')">삭제</button>`; } li.innerHTML = `<div class="feed-header"><div><span style="font-weight:bold;">${feed.name}</span><span style="font-size:0.8em; color:#999; margin-left:8px;">${dateStr}</span></div>${deleteBtn}</div>${imgHtml}<div style="white-space:pre-wrap;">${content}</div><div class="comment-section"><ul class="comment-list">${commentHtml}</ul><div style="display:flex; gap:5px;"><input type="text" id="commentInput-${feed.id}" placeholder="댓글 달기..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;"><button class="btn-submit" style="width:60px; padding:0;" onclick="saveComment('${feed.id}')">등록</button></div></div>`; listEl.appendChild(li); }); }
+    
+    function renderFeed() { const listEl = document.getElementById('feedList'); listEl.innerHTML = ''; if (!dbData.feeds || dbData.feeds.length === 0) { listEl.innerHTML = '<li style="text-align:center; padding:20px; color:#999;">첫 글을 남겨보세요!</li>'; return; } const myName = document.getElementById('userName').value.trim(); [...dbData.feeds].reverse().forEach(feed => { const li = document.createElement('li'); li.className = 'feed-item'; let content = feed.content; let imgHtml = ""; try { if(content.startsWith("{")) { const parsed = JSON.parse(content); content = parsed.text; if(parsed.img) imgHtml = `<img src="${parsed.img}" class="feed-img">`; } } catch(e) {} const myComments = dbData.comments ? dbData.comments.filter(c => c.feedId === feed.id) : []; let commentHtml = ''; myComments.forEach(c => { commentHtml += `<li class="comment-item"><span class="comment-author">${c.name}</span><span class="comment-content">${c.content}</span></li>`; }); const dateStr = new Date(feed.timestamp).toLocaleString(); 
+    
+    // 수정/삭제 버튼 추가
+    let actionBtns = ""; 
+    if(myName && feed.name === myName) { 
+        // 텍스트만 추출해서 수정 함수에 전달 (이미지는 유지)
+        actionBtns = `
+            <button class="btn-edit" onclick="editFeed('${feed.id}', '${encodeURIComponent(content)}')">수정</button>
+            <button class="btn-delete" onclick="deleteFeed('${feed.id}')">삭제</button>
+        `;
+    } 
+    li.innerHTML = `<div class="feed-header"><div><span style="font-weight:bold;">${feed.name}</span><span style="font-size:0.8em; color:#999; margin-left:8px;">${dateStr}</span></div><div>${actionBtns}</div></div>${imgHtml}<div style="white-space:pre-wrap;">${content}</div><div class="comment-section"><ul class="comment-list">${commentHtml}</ul><div style="display:flex; gap:5px;"><input type="text" id="commentInput-${feed.id}" placeholder="댓글 달기..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;"><button class="btn-submit" style="width:60px; padding:0; margin-top:0;" onclick="saveComment('${feed.id}')">등록</button></div></div>`; listEl.appendChild(li); }); }
+    
     function renderMembers() { const listEl = document.getElementById('memberList'); listEl.innerHTML = ''; if (!dbData.members || dbData.members.length === 0) { listEl.innerHTML = '<p style="text-align:center; color:#999;">멤버가 없습니다.</p>'; return; } dbData.members.forEach(member => { const div = document.createElement('div'); div.className = 'member-card'; const avatarUrl = member.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${member.name}`; div.innerHTML = `<img src="${avatarUrl}" class="member-avatar"><div class="member-name">${member.name}</div><div class="member-bio">${member.bio}</div>`; listEl.appendChild(div); }); }
     function saveTask() { const name = document.getElementById('userName').value.trim(); const rating = document.getElementById('inputRating').value; if(!name) { alert("이름을 입력해주세요!"); return; } const items = []; document.querySelectorAll('#taskItemsContainer .input-row').forEach(row => { const type = row.querySelector('.type-select').value; const content = row.querySelector('.content-input').value.trim(); if(content) items.push({ category: type, content: content }); }); if(items.length === 0) { alert("항목을 입력해주세요."); return; } const taskObject = { rating: rating, items: items }; const taskString = JSON.stringify(taskObject); const newData = { action: 'saveTask', date: selectedDateKey, name: name, task: taskString }; dbData.tasks = dbData.tasks.filter(t => !(t.date === selectedDateKey && t.name === name)); dbData.tasks.push(newData); renderWeeklyCalendar(); closeModal(); fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(newData) }); }
     function saveFeed() { const name = document.getElementById('userName').value.trim(); const content = document.getElementById('inputFeed').value.trim(); const imgUrl = document.getElementById('inputFeedImg').value.trim(); if(!name || (!content && !imgUrl)) { alert("내용을 입력해주세요."); return; } const feedData = { text: content, img: imgUrl }; const newData = { action: 'saveFeed', id: 'feed_' + Date.now(), name: name, content: JSON.stringify(feedData), timestamp: new Date().toISOString() }; if(!dbData.feeds) dbData.feeds = []; dbData.feeds.push(newData); renderFeed(); document.getElementById('inputFeed').value = ''; document.getElementById('inputFeedImg').value = ''; fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(newData) }); }
